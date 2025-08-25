@@ -1,0 +1,29 @@
+{
+  "name": "genai-career-advisor-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Soiidux/GenAI-Career-Advisor-v2.git"
+  },
+  "keywords": [],
+  "author": "soiidux",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Soiidux/GenAI-Career-Advisor-v2/issues"
+  },
+  "homepage": "https://github.com/Soiidux/GenAI-Career-Advisor-v2#readme",
+  "dependencies": {
+    "@google-cloud/vertexai": "^1.10.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
