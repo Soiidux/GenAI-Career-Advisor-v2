@@ -76,3 +76,30 @@ export const postProfile= async (req,res)=>{
     }
 }
 
+export const startConversation = async (req, res) => {
+    try {
+        const user = await User.findOne({});
+        if (!user) {
+            return res.status(404).json({ message: 'Demo user profile not found.' });
+        }
+
+        const newConversation = await Conversation.create({
+            userId: user._id,
+            history: [],
+            title: "New Conversation" // Set a default title
+        });
+
+        // Send the new ID back to the frontend
+        res.status(201).json({ 
+            conversationId: newConversation._id,
+            success:true
+        });
+
+    } catch (error) {
+        console.error("Error starting conversation:", error);
+        res.status(500).json({ 
+            message: 'Could not create new conversation.',
+            success: true
+        });
+    }
+};
