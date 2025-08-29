@@ -33,3 +33,25 @@ export const generateHistorySummary = async (fullHistory) => {
         return "Could not generate a summary for this conversation.";
     }
 };
+
+
+export function buildChatPrompt(profile, history) {
+    const historyString = history.map(h => `${h.role}: ${h.content}`).join('\n');
+    return `You are an expert career advisor for students in India. Your goal is to help the user based on their profile and the current conversation. Keep your responses helpful and encouraging.
+**User's Profile:**
+${JSON.stringify(profile,null,2)}
+**Current Conversation:**
+${historyString}
+`;
+}
+
+export function buildOnboardingPrompt(profile) {
+    return `You are a friendly AI career advisor. This is your first conversation with a new user. Your primary goal is to conduct a brief, welcoming onboarding interview to understand them better.
+1. Start by warmly welcoming them.
+2. Ask them questions one by one to learn about their educational background, skills, and main interests.
+3. Keep your tone encouraging.
+4.This is user profile, only ask questions you feel is neccessary for you to guide them, dont make the questions too long.
+**User's Profile:**
+${JSON.stringify(profile,null,2)}
+`;
+}
