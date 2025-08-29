@@ -2,6 +2,7 @@ import User from '../db/user.model.js';
 import Conversation from '../db/conversation.model.js';
 import dotenv from 'dotenv';
 import generativeModel from '../utils/genai.js';
+import { generateHistorySummary } from '../utils/conversation.utils.js';
 dotenv.config();
 const PROJECT_ID = process.env.PROJECT_ID;
 const LOCATION = process.env.LOCATION;
@@ -103,3 +104,95 @@ export const startConversation = async (req, res) => {
         });
     }
 };
+
+
+export const postChatMessageWithHistory = async (req, res) => {
+    try {
+        const { conversationId, message } = req.body;
+
+        if (!conversationId || !message) {
+            return res.status(400).json({ message: 'conversationId and message are required.' });
+        }
+
+        const profile = await User.findOne({});
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: 'Conversation not found.' });
+        }
+
+        // Add user's message to history
+        conversation.history.push({ role: 'user', content: message });
+        
+        let prompt;
+        // Check the isNewUser flag to decide which prompt to use
+        if (profile.isNewUser) {
+            prompt = buildOnboardingPrompt(profile.name, message);
+            profile.isNewUser = false; // Flip the flag after the first message
+            await profile.save();
+        } else {
+            const recentHistory = conversation.history.slice(-10);
+            prompt = buildChatPrompt(profile, recentHistory);
+        }
+        
+        const resp = await generativeModel.generateContent(prompt);
+        const aiResponse = resp.response.candidates[0].content.parts[0].text;
+
+        // Add AI's response to history
+        conversation.history.push({ role: 'model', content: aiResponse });
+        await conversation.save();
+
+        res.status(200).json({ reply: aiResponse });
+
+    } catch (error) {
+        console.error("Error in chat message controller:", error);
+        res.status(500).json({ message: 'Error processing your message.' });
+    }
+};
+
+
+export const postChatMessageWithChatSummary = async (req, res) => {
+    try {
+        const { conversationId, message } = req.body;
+
+        if (!conversationId || !message) {
+            return res.status(400).json({ message: 'conversationId and message are required.' });
+        }
+
+        const profile = await User.findOne({});
+        const conversation = await Conversation.findById(conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ message: 'Conversation not found.' });
+        }
+
+        // Add user's message to history
+        conversation.history.push({ role: 'user', content: message });
+        
+        let prompt;
+        // Check the isNewUser flag to decide which prompt to use
+        if (profile.isNewUser) {
+            prompt = buildOnboardingPrompt(profile.name, message);
+            profile.isNewUser = false; // Flip the flag after the first message
+            await profile.save();
+        } else {
+            const recentHistory = await generateHistorySummary(conversation.history);
+            prompt = buildChatPrompt(profile, recentHistory);
+        }
+        
+        const resp = await generativeModel.generateContent(prompt);
+        const aiResponse = resp.response.candidates[0].content.parts[0].text;
+
+        // Add AI's response to history
+        conversation.history.push({ role: 'model', content: aiResponse });
+        await conversation.save();
+
+        res.status(200).json({ reply: aiResponse });
+
+    } catch (error) {
+        console.error("Error in chat message controller:", error);
+        res.status(500).json({ message: 'Error processing your message.' });
+    }
+};
+
+
