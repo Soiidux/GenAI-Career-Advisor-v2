@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Advisor</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles specific to the chat page */
+        .chat-window {
+            height: 400px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+        }
+        .message { margin-bottom: 15px; }
+        .message.user { text-align: right; }
+        .message p {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin: 0;
+            max-width: 70%;
+        }
+        .message.user p { background-color: #007bff; color: white; }
+        .message.model p { background-color: #e9ecef; color: #333; }
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex-grow: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="chat.html" class="active">Chat</a>
+            <a href="history.html">History</a>
+        </nav>
+        
+        <h1>Chat with your AI Advisor</h1>
+        
+        <div class="chat-window">
+            <div class="message model"><p>Hello! How can I help you with your career goals today?</p></div>
+            <div class="message user"><p>I'm interested in software development.</p></div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message...">
+            <button class="btn">Send</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Advisor - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="chat.html">Chat</a>
+            <a href="history.html">History</a>
+        </nav>
+        
+        <h1>Your Career Dashboard</h1>
+
+        <h2>AI-Generated Summary</h2>
+        <p id="ai-summary">This is where the AI's summary of your profile will appear...</p>
+        
+        <hr>
+
+        <h2>Suggested Career Paths</h2>
+        <div id="suggested-paths">
+            <p>Your suggested career paths will show up here after a chat session.</p>
+        </div>
+
+        <hr>
+        
+        <h2>Your Profile</h2>
+        <div class="form-group">
+            <label for="skills">Your Skills (comma-separated)</label>
+            <textarea id="skills" rows="3">JavaScript, Python, Project Management</textarea>
+        </div>
+        <button class="btn">Save Profile</button>
+    </div>
+</body>
+</html>

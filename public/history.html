@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation History</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .history-list { list-style: none; padding: 0; }
+        .history-item {
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: box-shadow 0.3s;
+        }
+        .history-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .history-item h3 { margin: 0 0 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="chat.html">Chat</a>
+            <a href="history.html" class="active">History</a>
+        </nav>
+        
+        <h1>Your Conversation History</h1>
+        
+        <ul class="history-list">
+            <li class="history-item">
+                <h3>Discussion on Python Skills</h3>
+                <p>Explored the transition from a non-tech role into a Python developer position...</p>
+            </li>
+            <li class="history-item">
+                <h3>Exploring Marketing Careers</h3>
+                <p>Analyzed user's interest in creative fields and suggested roles in digital marketing...</p>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
