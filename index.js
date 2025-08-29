@@ -1,15 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { VertexAI } from '@google-cloud/vertexai';
+import multer from 'multer';
+import generativeModel from './utils/genai.js';
 import { dbConnect } from './db/dbConnect.js';
 import router from './routes/user.routes.js';
 
 //loading configs
 dotenv.config();
-const PROJECT_ID = process.env.PROJECT_ID;
-const LOCATION = process.env.LOCATION;
-const MODEL_NAME = process.env.MODEL_NAME;
-// const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const PORT = process.env.PORT;
 
 //initializing the app
@@ -17,11 +14,6 @@ const app = express();
 app.use(express.json());     //json built-in middleware
 app.use(router);
 
-//initializing vertexAI
-const vertex_ai = new VertexAI({ project: PROJECT_ID, location: LOCATION });
-const generativeModel = vertex_ai.getGenerativeModel({
-  model: MODEL_NAME,
-});
 
 app.post('/get-advice', async (req, res) => {
   try {
