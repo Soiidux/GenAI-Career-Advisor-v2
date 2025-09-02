@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema({
       type: String,
       trim: true
     },
+    aiConversationSummary: {
+      type: String,
+      trim: true
+    },
     isNewUser: {
         type: Boolean,
         default: true // Every new user starts as 'new'
