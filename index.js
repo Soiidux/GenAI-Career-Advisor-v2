@@ -12,7 +12,7 @@ const PORT = process.env.PORT;
 //initializing the app
 const app = express();
 app.use(express.json());     //json built-in middleware
-app.use(router);
+app.use("/api/v1/users",router);
 
 
 app.post('/get-advice', async (req, res) => {
