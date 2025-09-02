@@ -2,7 +2,7 @@ import User from '../db/user.model.js';
 import Conversation from '../db/conversation.model.js';
 import dotenv from 'dotenv';
 import generativeModel from '../utils/genai.js';
-import { generateHistorySummary } from '../utils/conversation.utils.js';
+import { generateHistorySummary , buildChatPrompt , buildOnboardingPrompt, generateConversationAnalysis } from '../utils/conversation.utils.js';
 dotenv.config();
 const PROJECT_ID = process.env.PROJECT_ID;
 const LOCATION = process.env.LOCATION;
@@ -100,7 +100,7 @@ export const startConversation = async (req, res) => {
         console.error("Error starting conversation:", error);
         res.status(500).json({ 
             message: 'Could not create new conversation.',
-            success: true
+            success: false
         });
     }
 };
@@ -127,12 +127,12 @@ export const postChatMessageWithHistory = async (req, res) => {
         let prompt;
         // Check the isNewUser flag to decide which prompt to use
         if (profile.isNewUser) {
-            prompt = buildOnboardingPrompt(profile.name, message);
+            prompt = buildOnboardingPrompt(profile,message);
             profile.isNewUser = false; // Flip the flag after the first message
             await profile.save();
         } else {
             const recentHistory = conversation.history.slice(-10);
-            prompt = buildChatPrompt(profile, recentHistory);
+            prompt = buildChatPrompt(profile, recentHistory, message);
         }
         
         const resp = await generativeModel.generateContent(prompt);
@@ -172,12 +172,12 @@ export const postChatMessageWithChatSummary = async (req, res) => {
         let prompt;
         // Check the isNewUser flag to decide which prompt to use
         if (profile.isNewUser) {
-            prompt = buildOnboardingPrompt(profile.name, message);
+            prompt = buildOnboardingPrompt(profile,message);
             profile.isNewUser = false; // Flip the flag after the first message
             await profile.save();
         } else {
             const recentHistory = await generateHistorySummary(conversation.history);
-            prompt = buildChatPrompt(profile, recentHistory);
+            prompt = buildChatPrompt(profile, recentHistory, message);
         }
         
         const resp = await generativeModel.generateContent(prompt);
@@ -192,5 +192,93 @@ export const postChatMessageWithChatSummary = async (req, res) => {
     } catch (error) {
         console.error("Error in chat message controller:", error);
         res.status(500).json({ message: 'Error processing your message.' });
+    }
+};
+
+export const endConversation = async (req, res) => {
+    try {
+        const user = await User.findOne({});
+        const { conversationId } = req.body;
+        const conversation = await Conversation.findById(conversationId);
+        // --- Validation Block ---
+
+        // 1. Check if the demo user profile exists at all.
+        if (!user) {
+            return res.status(404).json({ message: "Primary user profile not found in the database." });
+        }
+
+        // 2. Check if a conversationId was actually sent in the request body.
+        if (!conversationId) {
+            return res.status(400).json({ message: "conversationId is required in the request body." });
+        }
+
+        // 3. Check if the conversationId corresponds to a real conversation.
+        if (!conversation) {
+            return res.status(404).json({ message: `Conversation with ID ${conversationId} not found.` });
+        }
+
+        // 4. (Optional but good) Check if the conversation is empty.
+        if (conversation.history.length === 0) {
+            return res.status(200).json({ message: "Conversation ended with no new summary, as it was empty." });
+        }
+
+        // 1. Make a SINGLE call to the AI for all analysis
+        const analysis = await generateConversationAnalysis(user.aiConversationSummary, conversation.history);
+
+        // 2. Update the documents in memory (this is synchronous and fast)
+        conversation.summary = analysis.summary;
+        conversation.title = analysis.title;
+        user.aiConversationSummary = analysis.updatedMasterSummary;
+        user.aiCareerAnalysis = analysis.aiCareerAnalysis;
+        user.aiCareerAnalysis = JSON.stringify(analysis.aiCareerAnalysis, null, 2);
+        // 3. Save both documents to the database in parallel
+        await Promise.all([
+            conversation.save(),
+            user.save()
+        ]);
+
+        res.status(200).json({ 
+            message: "Conversation and user profile updated successfully.",
+            summary: analysis.summary 
+        });
+
+    } catch (error) {
+        console.error("Error ending conversation:", error);
+        res.status(500).json({ message: 'Error generating summary.' });
+    }
+};
+
+export const getProfile = async (req, res) => {
+    try {
+        // Find the first (and only) user document in the collection.
+        const profile = await User.findOne({});
+
+        if (!profile) {
+            // This happens if the database has not been seeded yet.
+            return res.status(404).json({ message: "Profile not found. Please seed the database." });
+        }
+
+        // Send the complete profile object back to the frontend.
+        res.status(200).json(profile);
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ message: "Server error while fetching profile." });
+    }
+};
+
+export const getConversations = async (req, res) => {
+    try {
+        // Find all conversations and sort them with the newest first.
+        // .select() is an optimization that only fetches the fields we need.
+        const conversations = await Conversation.find({})
+            .sort({ createdAt: -1 })
+            .select('title summary createdAt'); // Only get these fields
+
+        res.status(200).json(conversations);
+
+    } catch (error) {
+        console.error("Error fetching conversation history:", error);
+        res.status(500).json({ message: "Server error while fetching history." });
     }
 };
