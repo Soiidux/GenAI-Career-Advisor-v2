@@ -1,0 +1,73 @@
+{
+  "name": "EligibilityResult",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this result belongs to"
+    },
+    "is_eligible": {
+      "type": "boolean",
+      "description": "Whether the user is eligible for PM Internship Scheme"
+    },
+    "eligibility_score": {
+      "type": "number",
+      "description": "Overall eligibility score out of 100"
+    },
+    "criteria_results": {
+      "type": "object",
+      "properties": {
+        "age_check": {
+          "type": "boolean",
+          "description": "Age between 21-24 years"
+        },
+        "citizenship_check": {
+          "type": "boolean",
+          "description": "Indian citizenship confirmed"
+        },
+        "qualification_check": {
+          "type": "boolean",
+          "description": "Qualification meets requirements"
+        },
+        "employment_check": {
+          "type": "boolean",
+          "description": "Not in full-time work"
+        },
+        "education_check": {
+          "type": "boolean",
+          "description": "Not in full-time in-person education"
+        },
+        "income_check": {
+          "type": "boolean",
+          "description": "Family income below ₹8,00,000"
+        },
+        "exclusion_check": {
+          "type": "boolean",
+          "description": "No exclusion criteria met"
+        }
+      }
+    },
+    "failed_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of failed criteria with explanations"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recommendations for improvement if not eligible"
+    },
+    "readiness_score": {
+      "type": "number",
+      "description": "Career readiness score out of 100"
+    }
+  },
+  "required": [
+    "user_id",
+    "is_eligible"
+  ]
+}
